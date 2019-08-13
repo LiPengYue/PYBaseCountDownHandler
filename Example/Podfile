@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '8.0'
+
+target 'PYBaseCountDownHandler_Example' do
+  pod 'PYBaseCountDownHandler', :path => '../'
+
+  target 'PYBaseCountDownHandler_Tests' do
+    inherit! :search_paths
+
+    pod 'FBSnapshotTestCase'
+  end
+end
