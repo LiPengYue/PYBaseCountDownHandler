@@ -59,14 +59,14 @@
 		6003F5B9195388D20070C39A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		6003F5BB195388D20070C39A /* Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Tests.m; sourceTree = "<group>"; };
 		606FC2411953D9B200FFA9A0 /* Tests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests-Prefix.pch"; sourceTree = "<group>"; };
-		63D37D0CCB7BEE98B547005B /* PYBaseCountDownHandler.podspec */ = {isa = PBXFileReference; includeInIndex = 1; name = PYBaseCountDownHandler.podspec; path = ../PYBaseCountDownHandler.podspec; sourceTree = "<group>"; };
+		63D37D0CCB7BEE98B547005B /* PYBaseCountDownHandler.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = PYBaseCountDownHandler.podspec; path = ../PYBaseCountDownHandler.podspec; sourceTree = "<group>"; };
 		71719F9E1E33DC2100824A3D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		873B8AEA1B1F5CCA007FD442 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = Main.storyboard; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		8DB4C11F73475B6AB726C692 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		8DB4C11F73475B6AB726C692 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		8DDEC2B8514E3799331FDAFC /* Pods-PYBaseCountDownHandler_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PYBaseCountDownHandler_Example.debug.xcconfig"; path = "Target Support Files/Pods-PYBaseCountDownHandler_Example/Pods-PYBaseCountDownHandler_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		AF3DB69A8DEDF563279F7BCE /* Pods-PYBaseCountDownHandler_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PYBaseCountDownHandler_Example.release.xcconfig"; path = "Target Support Files/Pods-PYBaseCountDownHandler_Example/Pods-PYBaseCountDownHandler_Example.release.xcconfig"; sourceTree = "<group>"; };
 		C4447E6D9DE0D8539F4F7BA6 /* Pods_PYBaseCountDownHandler_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PYBaseCountDownHandler_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		C9C6263D64EE656BF84E2D0A /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		C9C6263D64EE656BF84E2D0A /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -193,7 +193,6 @@
 				5593AA67C02EF6B655361C1D /* Pods-PYBaseCountDownHandler_Tests.debug.xcconfig */,
 				2D18E9B56B328E83CE5C2467 /* Pods-PYBaseCountDownHandler_Tests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -249,6 +248,9 @@
 				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = LiPengYue;
 				TargetAttributes = {
+					6003F589195388D20070C39A = {
+						DevelopmentTeam = 67VM37Q2CL;
+					};
 					6003F5AD195388D20070C39A = {
 						TestTargetID = 6003F589195388D20070C39A;
 					};
@@ -259,6 +261,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -513,6 +516,7 @@
 			baseConfigurationReference = 8DDEC2B8514E3799331FDAFC /* Pods-PYBaseCountDownHandler_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 67VM37Q2CL;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "PYBaseCountDownHandler/PYBaseCountDownHandler-Prefix.pch";
 				INFOPLIST_FILE = "PYBaseCountDownHandler/PYBaseCountDownHandler-Info.plist";
@@ -529,6 +533,7 @@
 			baseConfigurationReference = AF3DB69A8DEDF563279F7BCE /* Pods-PYBaseCountDownHandler_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 67VM37Q2CL;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "PYBaseCountDownHandler/PYBaseCountDownHandler-Prefix.pch";
 				INFOPLIST_FILE = "PYBaseCountDownHandler/PYBaseCountDownHandler-Info.plist";
