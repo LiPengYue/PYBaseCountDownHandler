@@ -2,7 +2,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'PYBaseCountDownHandler'
-  s.version          = '0.1.0'
+  s.version          = '0.1.1'
   s.summary          = '倒计时工具： 支持优效率的列表倒计时 和 对时间的处理、比较'
 
   s.description      = <<-DESC
