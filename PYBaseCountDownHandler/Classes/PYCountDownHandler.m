@@ -6,37 +6,51 @@
 //  Copyright © 2018年 yi23. All rights reserved.
 //
 
-#import "CountDownHandler.h"
+#import "PYCountDownHandler.h"
 #import <objc/runtime.h>
 
-CGFloat STATIC_CURRENT_TIME_DIFFERENCE = 0;
+CGFloat STATIC_CURRENT_TIME_DIFFERENCE = 0.0f;
+CGFloat STATIC_CURRENT_TIME_TOTAL_DIFFERENCE = 0.0f;
 NSDate *STATIC_APPLICATION_DID_ENTER_BACKGROUND = nil;
 NSDate *STATIC_APPLICATION_DID_BECOME_ACTIVE = nil;
 
 static NSString *const K_countDownHandler_startCountDown = @"K_countDownHandler_startCountDown";
+static NSString *const K_countDownHandler_startCountDown_becomeActive_notification = @"K_countDownHandler_startCountDown_becomeActive_notification";
 
-
-@interface CountDownHandler()
+@interface PYCountDownHandler()
 @property (nonatomic,strong) NSMutableArray <id<CountDownHandlerViewDelegate>>*delegates;
 @property (nonatomic,strong) NSMutableArray <id<CountDownHandlerDataSource>>*dataSources;
 @property (nonatomic,strong) dispatch_semaphore_t semaphore;
 @property (nonatomic, strong) dispatch_source_t timer;
+@property (nonatomic,strong) void(^currentTimeDifferentBlock)(CGFloat currentTimeDifferent, PYCountDownHandler *countDownHandler);
 @end
 
-@implementation CountDownHandler
+@implementation PYCountDownHandler
 
-+ (void)applicationDidBecomeActiveWithCurrentDate:(NSDate *)date {
++ (void)applicationWillEnterForegroundWithCurrentDate:(NSDate *)date {
     STATIC_APPLICATION_DID_BECOME_ACTIVE = date;
     STATIC_CURRENT_TIME_DIFFERENCE = -1;
+    [[NSNotificationCenter defaultCenter] postNotificationName:K_countDownHandler_startCountDown_becomeActive_notification object:nil];
 }
+
 + (void) applicationDidEnterBackgroundWithCurrentDate: (NSDate *)date {
     STATIC_APPLICATION_DID_ENTER_BACKGROUND = date;
     STATIC_CURRENT_TIME_DIFFERENCE = -1;
 }
 
-+ (NSInteger)timeDifferent {
-    if (STATIC_CURRENT_TIME_DIFFERENCE <= 0) {
++ (CGFloat) totalTimeDifferent {
+    return STATIC_CURRENT_TIME_TOTAL_DIFFERENCE;
+}
+
++ (CGFloat)currentTimeDifferent {
+    
+    if (STATIC_CURRENT_TIME_DIFFERENCE <= 0 && STATIC_APPLICATION_DID_BECOME_ACTIVE && STATIC_APPLICATION_DID_ENTER_BACKGROUND) {
         STATIC_CURRENT_TIME_DIFFERENCE = STATIC_APPLICATION_DID_BECOME_ACTIVE.timeIntervalSince1970 - STATIC_APPLICATION_DID_ENTER_BACKGROUND.timeIntervalSince1970;
+        STATIC_CURRENT_TIME_TOTAL_DIFFERENCE += STATIC_CURRENT_TIME_DIFFERENCE;
+    }else{
+        STATIC_CURRENT_TIME_DIFFERENCE = 0.0;
+        STATIC_CURRENT_TIME_TOTAL_DIFFERENCE = 0.0;
+        return 0.0;
     }
     return STATIC_CURRENT_TIME_DIFFERENCE;
 }
@@ -55,6 +69,7 @@ static NSString *const K_countDownHandler_startCountDown = @"K_countDownHandler_
         [self createTimer];
     }
 }
+
 - (void) end {
     if (self.timer) {
         dispatch_cancel(self.timer);
@@ -68,6 +83,7 @@ static NSString *const K_countDownHandler_startCountDown = @"K_countDownHandler_
         [weakSelf registerCountDownEventWithDataSource:obj];
     }];
 }
+
 - (void) registerCountDownEventWithDataSource:(id<CountDownHandlerDataSource>)dataSource {
     
     if (!dataSource) {
@@ -97,6 +113,7 @@ static NSString *const K_countDownHandler_startCountDown = @"K_countDownHandler_
         [weakSelf registerCountDownEventWithDelegate:obj];
     }];
 }
+
 - (void) registerCountDownEventWithDelegate: (id <CountDownHandlerViewDelegate>)delegate{
     if (!delegate) {
         NSLog(@".\
@@ -195,36 +212,37 @@ static NSString *const K_countDownHandler_startCountDown = @"K_countDownHandler_
 
 - (void) createTimer {
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    dispatch_source_t _timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,queue);
-    dispatch_source_set_timer(_timer,dispatch_walltime(NULL, 0),1.0*NSEC_PER_SEC, 0); //每秒执行
     
-//    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,0);
-//
-//    dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
-    self.timer = _timer;
+      dispatch_time_t t = self.isStopWithBackstage ? DISPATCH_TIME_NOW : dispatch_walltime(NULL,0);
+    
+    dispatch_source_t _timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,queue);
     /*
-     第一个参数:定时器对象
-     第二个参数:DISPATCH_TIME_NOW 表示从现在开始计时
-     第三个参数:间隔时间 GCD里面的时间最小单位为 纳秒
-     第四个参数:精准度(表示允许的误差,0表示绝对精准)
-     */
-    dispatch_time_t t = self.isStopWithBackstage ? DISPATCH_TIME_NOW : dispatch_walltime(NULL,0);
-    t = dispatch_walltime(NULL,0);
-//    dispatch_source_set_timer(self.timer, t, self.timeInterval * NSEC_PER_SEC, 0 * NSEC_PER_SEC);
+    第一个参数:定时器对象
+    第二个参数:DISPATCH_TIME_NOW 表示从现在开始计时相对时间 dispatch_walltime 绝对时间
+    第三个参数:间隔时间 GCD里面的时间最小单位为 纳秒
+    第四个参数:精准度(表示允许的误差,0表示绝对精准)
+    */
+    dispatch_source_set_timer(_timer,t,1.0*NSEC_PER_SEC, 0);
+    
+    self.timer = _timer;
+
     __weak typeof(self) weakSelf = self;
     dispatch_source_set_event_handler(self.timer, ^{
         [weakSelf timerAction];
     });
+    
     dispatch_resume(self.timer);
 }
 
 - (void)dealloc {
     NSLog(@"✅销毁：%@",NSStringFromClass([self class]));
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (NSArray *) getCurrentDelegates {
     return self.delegates.copy;
 }
+
 - (NSArray *) getCurrentDataSource {
     return self.dataSources.copy;
 }
@@ -235,6 +253,7 @@ static NSString *const K_countDownHandler_startCountDown = @"K_countDownHandler_
         [weakSelf removeDelegate:obj];
     }];
 }
+
 - (void)removeAllDataSource {
     __weak typeof(self)weakSelf = self;
     [self lock:^{
@@ -249,35 +268,26 @@ static NSString *const K_countDownHandler_startCountDown = @"K_countDownHandler_
     }
     return _delegates;
 }
+
 - (NSMutableArray <id<CountDownHandlerDataSource>> *)dataSources {
     if (!_dataSources) {
         _dataSources = [NSMutableArray new];
     }
     return _dataSources;
 }
+
 - (dispatch_semaphore_t) semaphore {
     if (!_semaphore) {
         _semaphore = dispatch_semaphore_create(1);
     }
     return _semaphore;
 }
-//
-//- (void) setDelegateStartCountDownTime: (id<CountDownHandlerViewDelegate>)delegate {
-//    if (!delegate) return;
-//    objc_setAssociatedObject(delegate, &K_countDownHandler_startCountDown, @(self.currentTime), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-//}
-//- (CGFloat) getDelegateStartCountDownTime: (id<CountDownHandlerViewDelegate>)delegate {
-//    NSNumber *obj = objc_getAssociatedObject(delegate, &K_countDownHandler_startCountDown);
-//    if (![obj isKindOfClass:[NSNumber class]]) {
-//        return -1;
-//    }
-//    return obj.integerValue;
-//}
 
 - (void) setDataSourceStartCountDownTime: (id<CountDownHandlerDataSource>)dataSource {
     if (!dataSource) return;
     objc_setAssociatedObject(dataSource, &K_countDownHandler_startCountDown, @(self.currentTime), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
+
 - (CGFloat) getDataSourceStartCountDownTime: (id<CountDownHandlerDataSource>)dataSource {
     NSNumber *obj = objc_getAssociatedObject(dataSource, &K_countDownHandler_startCountDown);
     if (![obj isKindOfClass:[NSNumber class]]) {
@@ -293,5 +303,37 @@ static NSString *const K_countDownHandler_startCountDown = @"K_countDownHandler_
               \n   🌶： 如果出现倒计时复用问题，必须要在`registerCountDownEventWithDelegate`之前，保证delegate数据源存在\
               \n   也就是确保`getViewDelegateMapDataSource`可以获取到正确的值\
               \n.",NSStringFromClass([self class]));
+}
+
+- (void) applicationWillEnterForegroundWithCurrentDate:(void (^)(CGFloat, PYCountDownHandler *))currentTimeDifferentBlock {
+    self.currentTimeDifferentBlock = currentTimeDifferentBlock;
+}
+
+- (void)setCurrentTimeDifferentBlock:(void (^)(CGFloat, PYCountDownHandler *))currentTimeDifferentBlock {
+    if (currentTimeDifferentBlock) {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didBecomeActive) name:K_countDownHandler_startCountDown_becomeActive_notification object:nil];
+    }else{
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
+        NSLog(@"⚠️ currentTimeDifferentBlock 为nil 不再回调applicationDidBecomeActiveWithTimeDifferent");
+    }
+    _currentTimeDifferentBlock = currentTimeDifferentBlock;
+}
+
+- (void) didBecomeActive {
+    if (self.currentTimeDifferentBlock) {
+        self.currentTimeDifferentBlock([PYCountDownHandler currentTimeDifferent],self);
+    }
+}
+
+- (void) setIsStopWithBackstage:(BOOL)isStopWithBackstage {
+    _isStopWithBackstage = isStopWithBackstage;
+    if (isStopWithBackstage) {
+         [self applicationWillEnterForegroundWithCurrentDate:nil];
+    }else{
+        [self applicationWillEnterForegroundWithCurrentDate:^(CGFloat currentTimeDifferent, PYCountDownHandler *countDownHandler) {
+            countDownHandler.currentTime += currentTimeDifferent;
+        }];
+       
+    }
 }
 @end

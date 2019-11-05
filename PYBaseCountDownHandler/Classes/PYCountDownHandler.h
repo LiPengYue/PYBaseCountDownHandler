@@ -18,7 +18,6 @@
  
  > 2. 利用`CountDownHandlerViewDelegate`刷新UI
 
- 
  */
 
 
@@ -34,7 +33,7 @@
  3. 在tableView中持有`CountDownHandler`，并且需要在`tableView`的`DataSource`方法`cellFroRowAtIndexPath`中,调用 `registerCountDownEventWithDelegate`，把cell，作为delegate，在代理方法中修改UI
  */
 
-@class CountDownHandler;
+@class PYCountDownHandler;
 @protocol CountDownHandlerDataSource;
 
 
@@ -43,7 +42,7 @@
 /**
  在每次倒计时事件触发后调用与调用`registerCountDownEventWithDelegate`后都会触发代理方法`- (void) countDownHandler: (CountDownHandler *)handler andDataSource: (id <CountDownHandlerDataSource>)dataSource;`
  */
-- (void) countDownHandler: (CountDownHandler *)handler andDataSource: (id <CountDownHandlerDataSource>)dataSource;
+- (void) countDownHandler: (PYCountDownHandler *)handler andDataSource: (id <CountDownHandlerDataSource>)dataSource;
 
 /**
  获取视图所对应的Model
@@ -63,10 +62,10 @@
  @param handler handler
  @param until 当前已经倒计时了多少时间【剩余时间 = 倒计时总时间 - until】
  */
-- (void) countDownHandler: (CountDownHandler *)handler andDataSourceCurrenUntil: (CGFloat)until;
+- (void) countDownHandler: (PYCountDownHandler *)handler andDataSourceCurrenUntil: (CGFloat)until;
 @end
 
-@interface CountDownHandler : NSObject
+@interface PYCountDownHandler : NSObject
 
 /**
  倒计时 时间 间隔 （秒单位） 默认为1
@@ -74,7 +73,7 @@
 @property (nonatomic, assign) CGFloat timeInterval;
 
 /**
-  现在已经进行时间 (负数 秒单位) 默认为0
+  现在已经进行时间 (负数 秒单位) 默认为0 
  */
 @property (nonatomic, assign) CGFloat currentTime;
 
@@ -150,11 +149,24 @@
 
 /**
  进入后台后，是否停止倒计时 默认为false
+ 实现`applicationWillEnterForegroundWithCurrentDate`方法后 该属性失效
  */
 @property (nonatomic,assign) BOOL isStopWithBackstage;
 
-/// 进入后 又回到前台的时间差
-+ (NSInteger) timeDifferent;
+/**
+ 进入后台返回前台的回调 如果自定义实现这个方法，则 isStopWithBackstage 失效
+*/
+- (void) applicationWillEnterForegroundWithCurrentDate:(void(^)(CGFloat currentTimeDifferent, PYCountDownHandler *countDownHandler))currentTimeDifferentBlock;
+
+
+/// 进入后台 又回到前台的时间差
++ (CGFloat) currentTimeDifferent;
+
+/// 所有 进入后台 又回到前台的（currentTimeDifferent）时间差
++ (CGFloat) totalTimeDifferent;
+
+/// 
 + (void) applicationDidEnterBackgroundWithCurrentDate: (NSDate *)date;
-+ (void) applicationDidBecomeActiveWithCurrentDate: (NSDate *)date;
+
++ (void) applicationWillEnterForegroundWithCurrentDate: (NSDate *)date;
 @end
