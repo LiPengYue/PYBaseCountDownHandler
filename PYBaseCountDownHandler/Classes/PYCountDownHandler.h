@@ -148,10 +148,14 @@
 - (void) removeAllDataSource;
 
 /**
- 进入后台后，是否停止倒计时 默认为false
- 实现`applicationWillEnterForegroundWithCurrentDate`方法后 该属性失效
+* 停止后台计时
+*/
+- (void)stopBackstageTimeing;
+
+/**
+ * 开始后台计时
  */
-@property (nonatomic,assign) BOOL isStopWithBackstage;
+- (void)startBackgroundTiming;
 
 /**
  进入后台返回前台的回调 如果自定义实现这个方法，则 isStopWithBackstage 失效

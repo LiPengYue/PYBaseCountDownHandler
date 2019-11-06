@@ -4,7 +4,7 @@ PODS:
   - FBSnapshotTestCase/Core (2.1.4)
   - FBSnapshotTestCase/SwiftSupport (2.1.4):
     - FBSnapshotTestCase/Core
-  - PYBaseCountDownHandler (0.1.0)
+  - PYBaseCountDownHandler (0.1.2)
 
 DEPENDENCIES:
   - FBSnapshotTestCase
@@ -20,7 +20,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   FBSnapshotTestCase: 094f9f314decbabe373b87cc339bea235a63e07a
-  PYBaseCountDownHandler: 127276da2d7bdcb5b5f9b05836acdd8b9bc5300e
+  PYBaseCountDownHandler: 26446de2ad59636253578eb9497d1b9fa3bd7b32
 
 PODFILE CHECKSUM: 77c17d7556eef715ed2b50d9d08b03c0cc31a810
 

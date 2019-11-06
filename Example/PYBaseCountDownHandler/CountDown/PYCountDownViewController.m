@@ -41,24 +41,29 @@ UITableViewDataSource
 #pragma mark - functions
 
 - (void) setup {
+    
     self.countDownHandler = [[PYCountDownHandler alloc]init];
+    
+    __weak typeof(self)weakSelf = self;
+    [self.countDownHandler applicationWillEnterForegroundWithCurrentDate:^(CGFloat currentTimeDifferent, PYCountDownHandler *countDownHandler) {
+        CGFloat currentTimeline = [PYCountDownHandler currentTimeDifferent];
+        CGFloat totalTimeline = [PYCountDownHandler totalTimeDifferent];
+        weakSelf.label.text = [NSString stringWithFormat:@"进入后台：%.2lfs，共%lfs",currentTimeline,totalTimeline];
+    }];
+    
     self.countDownHandler.targetMaxCount = 100;
     
-//    self.countDownHandler.isStopWithBackstage = false;
+    [self.countDownHandler startBackgroundTiming];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didBecomeActive) name:@"K_countDownHandler_startCountDown_becomeActive_notification" object:nil];
+    [self.countDownHandler startBackgroundTiming];
     
     [self.countDownHandler start];
+    
     [self setupView];
     
     [self loadData];
 }
 
-- (void) didBecomeActive {
-    CGFloat currentTimeline = [PYCountDownHandler currentTimeDifferent];
-    CGFloat totalTimeline = [PYCountDownHandler totalTimeDifferent];
-    self.label.text = [NSString stringWithFormat:@"进入后台：%.2lfs，共%lfs",currentTimeline,totalTimeline];
-}
 
 // MARK: network
 - (void) loadData {
@@ -192,7 +197,11 @@ UITableViewDataSource
 }
 - (void)click_button {
     self.button.selected = !self.button.selected;
-    self.countDownHandler.isStopWithBackstage = self.button.selected;
+    if (!self.button.selected) {
+        [self.countDownHandler startBackgroundTiming];
+    }else{
+        [self.countDownHandler stopBackstageTimeing];
+    }
 }
 
 //MARK: - delegate && datasource

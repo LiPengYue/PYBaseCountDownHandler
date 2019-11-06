@@ -23,6 +23,11 @@ static NSString *const K_countDownHandler_startCountDown_becomeActive_notificati
 @property (nonatomic,strong) dispatch_semaphore_t semaphore;
 @property (nonatomic, strong) dispatch_source_t timer;
 @property (nonatomic,strong) void(^currentTimeDifferentBlock)(CGFloat currentTimeDifferent, PYCountDownHandler *countDownHandler);
+/**
+进入后台后，是否停止倒计时 默认为false
+实现`applicationWillEnterForegroundWithCurrentDate`方法后 该属性失效
+*/
+@property (nonatomic,assign) BOOL isStopWithBackstage;
 @end
 
 @implementation PYCountDownHandler
@@ -43,15 +48,6 @@ static NSString *const K_countDownHandler_startCountDown_becomeActive_notificati
 }
 
 + (CGFloat)currentTimeDifferent {
-    
-    if (STATIC_CURRENT_TIME_DIFFERENCE <= 0 && STATIC_APPLICATION_DID_BECOME_ACTIVE && STATIC_APPLICATION_DID_ENTER_BACKGROUND) {
-        STATIC_CURRENT_TIME_DIFFERENCE = STATIC_APPLICATION_DID_BECOME_ACTIVE.timeIntervalSince1970 - STATIC_APPLICATION_DID_ENTER_BACKGROUND.timeIntervalSince1970;
-        STATIC_CURRENT_TIME_TOTAL_DIFFERENCE += STATIC_CURRENT_TIME_DIFFERENCE;
-    }else{
-        STATIC_CURRENT_TIME_DIFFERENCE = 0.0;
-        STATIC_CURRENT_TIME_TOTAL_DIFFERENCE = 0.0;
-        return 0.0;
-    }
     return STATIC_CURRENT_TIME_DIFFERENCE;
 }
 
@@ -320,20 +316,32 @@ static NSString *const K_countDownHandler_startCountDown_becomeActive_notificati
 }
 
 - (void) didBecomeActive {
+    
+    [self setupTimeOffset];
+    
     if (self.currentTimeDifferentBlock) {
         self.currentTimeDifferentBlock([PYCountDownHandler currentTimeDifferent],self);
     }
+    if (self.isStopWithBackstage) {
+        self.currentTime += [PYCountDownHandler currentTimeDifferent];
+    }
 }
 
-- (void) setIsStopWithBackstage:(BOOL)isStopWithBackstage {
-    _isStopWithBackstage = isStopWithBackstage;
-    if (isStopWithBackstage) {
-         [self applicationWillEnterForegroundWithCurrentDate:nil];
-    }else{
-        [self applicationWillEnterForegroundWithCurrentDate:^(CGFloat currentTimeDifferent, PYCountDownHandler *countDownHandler) {
-            countDownHandler.currentTime += currentTimeDifferent;
-        }];
-       
-    }
+- (void) setupTimeOffset {
+    if (STATIC_CURRENT_TIME_DIFFERENCE <= 0 && STATIC_APPLICATION_DID_BECOME_ACTIVE && STATIC_APPLICATION_DID_ENTER_BACKGROUND) {
+           STATIC_CURRENT_TIME_DIFFERENCE = STATIC_APPLICATION_DID_BECOME_ACTIVE.timeIntervalSince1970 - STATIC_APPLICATION_DID_ENTER_BACKGROUND.timeIntervalSince1970;
+           STATIC_CURRENT_TIME_TOTAL_DIFFERENCE += STATIC_CURRENT_TIME_DIFFERENCE;
+       }else{
+           STATIC_CURRENT_TIME_DIFFERENCE = 0.0;
+           STATIC_CURRENT_TIME_TOTAL_DIFFERENCE = 0.0;
+       }
+}
+
+- (void)startBackgroundTiming {
+    self.isStopWithBackstage = true;
+}
+
+- (void)stopBackstageTimeing {
+    self.isStopWithBackstage = false;
 }
 @end
